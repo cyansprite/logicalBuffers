@@ -8,7 +8,8 @@ function! s:GetNextBuffer()
     let l:newbuf = 0
     let l:firstbuf = 0
     for buf in getbufinfo({'buflisted': 1})
-        if !empty(buf.windows) || l:curbuf == buf.bufnr || buf.hidden
+        if !empty(buf.windows) || l:curbuf == buf.bufnr || buf.hidden || 
+         \ getbufvar(buf.bufnr, "&buftype" != "")
             continue
         endif
 
