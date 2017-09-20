@@ -1,15 +1,102 @@
+" Global Vars {{{1
 if !has_key(g:,"logical_buffer_use_default")
     let g:logical_buffer_use_default = 1
 endif
 
-" Get buff that isn't already displayed in a window and isn't unlisted
+if !has_key(g:,"logical_buffer_override_stupid_tabline")
+    let g:logical_buffer_override_stupid_tabline = 1
+endif
+
+if !has_key(g:,"logical_buffer_ignore_hidden")
+    let g:logical_buffer_ignore_hidden = 1
+endif
+
+if !has_key(g:,"logical_buffer_ignore_weird")
+    let g:logical_buffer_ignore_weird = 1
+endif
+
+if !has_key(g:,"logical_buffer_ignore_windowed")
+    let g:logical_buffer_ignore_windowed = 1
+endif
+
+if !has_key(g:,"logical_buffer_sep")
+    let g:logical_buffer_sep = '|'
+endif
+
+if !has_key(g:,"logical_center_left_padding")
+    let g:logical_center_left_padding = 0
+endif
+
+if !has_key(g:,"logical_center_right_padding")
+    let g:logical_center_right_padding = 0
+endif
+
+if !hlexists( 'LogicalBuffer' )
+    hi LogicalBuffer ctermfg=254 ctermbg=63 cterm=bold
+endif
+
+if !hlexists( 'LogicalWindowHandle' )
+    hi LogicalWindowHandle ctermfg=63 ctermbg=none cterm=bold
+endif
+
+if !hlexists( 'LogicalModified' )
+    hi LogicalModified ctermfg=46 ctermbg=none cterm=bold
+endif
+
+if !hlexists( 'LogicalReadOnly' )
+    hi LogicalReadOnly ctermfg=196 ctermbg=none cterm=bold
+endif
+
+if !hlexists( 'Logical0' )
+    hi Logical0 ctermfg=231 ctermbg=0 cterm=bold
+endif
+
+if !hlexists( 'Logical1' )
+    hi Logical1 ctermfg=254 ctermbg=0
+endif
+
+if !hlexists( 'Logical2' )
+    hi Logical2 ctermfg=251 ctermbg=0
+endif
+
+if !hlexists( 'Logical3' )
+    hi Logical3 ctermfg=248 ctermbg=0
+endif
+
+if !hlexists( 'Logical4' )
+    hi Logical4 ctermfg=245 ctermbg=0
+endif
+
+if !hlexists( 'Logical5' )
+    hi Logical5 ctermfg=242 ctermbg=0
+endif
+
+if !hlexists( 'Logical6' )
+    hi Logical6 ctermfg=239 ctermbg=0
+endif
+
+if !hlexists( 'Logical7' )
+    hi Logical7 ctermfg=235 ctermbg=0
+endif
+
+" Help me!! {{{1
+function! s:keepGoing(buf)
+    return  (a:buf.hidden && g:logical_buffer_ignore_hidden) ||
+          \ (getbufvar(a:buf.bufnr, "&buftype" != "") && g:logical_buffer_ignore_weird)
+endfunc
+" If we are cycling we don't want to pick something already in a window...
+function! s:keepGoingMove(buf)
+    return (!empty(a:buf.windows) && g:logical_buffer_ignore_windowed) ||
+          \ bufnr('') == a:buf.bufnr ||
+          \ s:keepGoing(a:buf)
+endfunc
+
+" Get buff that isn't already displayed in a window and isn't unlisted {{{1
 function! s:GetNextBuffer()
-    let l:curbuf = bufnr("")
     let l:newbuf = 0
     let l:firstbuf = 0
     for buf in getbufinfo({'buflisted': 1})
-        if !empty(buf.windows) || l:curbuf == buf.bufnr || buf.hidden || 
-         \ getbufvar(buf.bufnr, "&buftype" != "")
+        if s:keepGoingMove(buf)
             continue
         endif
 
@@ -17,7 +104,7 @@ function! s:GetNextBuffer()
             let l:firstbuf = buf.bufnr
         endif
 
-        if l:curbuf > buf.bufnr
+        if bufnr('') > buf.bufnr
             let l:newbuf = buf.bufnr
             continue
         else
@@ -31,11 +118,10 @@ function! s:GetNextBuffer()
 endfunction
 
 function! s:GetPrevBuffer()
-    let l:curbuf = bufnr("")
     let l:newbuf = 0
     let l:firstbuf = 0
     for buf in reverse(getbufinfo({'buflisted': 1}))
-        if !empty(buf.windows) || l:curbuf == buf.bufnr || buf.hidden
+        if s:keepGoingMove(buf)
             continue
         endif
 
@@ -43,7 +129,7 @@ function! s:GetPrevBuffer()
             let l:firstbuf = buf.bufnr
         endif
 
-        if l:curbuf < buf.bufnr
+        if bufnr('') < buf.bufnr
             let l:newbuf = buf.bufnr
             continue
         else
@@ -56,11 +142,264 @@ function! s:GetPrevBuffer()
     endif
 endfunction
 
-nnoremap <Plug>(Logic-Next) :call <SID>GetNextBuffer()<cr>
-nnoremap <Plug>(Logic-Prev) :call <SID>GetPrevBuffer()<cr>
+" Tabline Fuck off {{{1
+function! logicalBuffers#TablineOverride()
+    let thebuffer = ''
+    let curbufname = ''
+    let leftbufferlist = []
+    let rightbufferlist = []
+    let leftfilebufferlist = []
+    let rightfilebufferlist = []
+    let goright = 0
+
+    for buf in (getbufinfo({'buflisted': 1}))
+        if s:keepGoing(buf)
+            continue
+        endif
+
+        let bufname     = bufname(buf.bufnr)
+        let amicur      = buf.bufnr == bufnr('')
+
+        let s = (l:bufname != '' ? ''. fnamemodify(l:bufname, ':t') . ' ' : '[No Name] ')
+        let bufname = l:s
+        let bufexpander = ''
+
+        if !empty(buf.windows)
+            let s = '%#LogicalWindowHandle#| ' . s . '%#LogicalWindowHandle#|'
+            let bufexpander = '   '
+        else
+            let s .= ' '
+            let bufexpander = ' '
+        endif
+
+        if getbufvar(buf.bufnr, "&mod")
+            let s .= '%#LogicalModified#[+]'
+            let bufexpander = '   '
+        endif
+
+        if getbufvar(buf.bufnr, "&ro")
+            let s .= '%#LogicalReadOnly#[RO]'
+            let bufexpander = '    '
+        endif
+
+        if !getbufvar(buf.bufnr, "&ma")
+            let s .= '%#LogicalReadOnly#[-]'
+            let bufexpander = '   '
+        endif
+        let bufname .= bufexpander
+
+        if l:amicur
+            let goright=1
+            let l:thebuffer = l:s
+            let l:curbufname = l:bufname
+        else
+            if l:goright
+                call add(rightbufferlist, l:s)
+                call add(rightfilebufferlist, l:bufname)
+            else
+                call add(leftbufferlist , l:s)
+                call add(leftfilebufferlist , l:bufname)
+            endif
+        endif
+
+    endfor
+
+    let consume = &columns
+    let consume -= len(l:curbufname)
+
+    let l:leftidx = len(leftbufferlist) - 1
+    let l:rightidx = 0
+    let l:leftfailed = 0
+    let l:rightfailed = 0
+
+    let l:Lfinal = []
+    let l:Rfinal = []
+    while 1
+        if leftfailed && rightfailed
+            break
+        endif
+
+        if !leftfailed
+            if l:leftidx < 0
+                let l:leftfailed = 1
+            else
+                let l = leftbufferlist[l:leftidx]
+                let la = leftfilebufferlist[l:leftidx]
+                let llen = len(l:la)
+                if l:llen < l:consume
+                    call insert(l:Lfinal,l:l)
+                    let l:consume -= l:llen
+                    let l:leftidx -= 1
+                else
+                    let l:leftfailed = 1
+                endif
+            endif
+        endif
+
+        if !rightfailed
+            if l:rightidx >= len(rightbufferlist)
+                let rightfailed = 1
+            else
+                let r = rightbufferlist[l:rightidx]
+                let ra = rightfilebufferlist[l:rightidx]
+                let rlen = len(l:ra)
+                if l:rlen < l:consume
+                    call add(l:Rfinal,l:r)
+                    let l:consume -= l:rlen
+                    let l:rightidx += 1
+                else
+                    let l:rightfailed = 1
+                endif
+            endif
+        endif
+    endwhile
+
+    let s = ''
+
+    " Left of
+    let tempidx = len(l:Lfinal) - 1
+    for l in l:Lfinal
+        let s  .= '%#Logical'. l:tempidx . '#' . l
+        let tempidx -= 1
+    endfor
+    let s .= '%4*%='
+
+    " The current
+    let s .= '%#LogicalBuffer#'.l:thebuffer .'%4*%='
+
+    " Right of
+    let tempidx = 0
+    for r in l:Rfinal
+        let s  .= '%#Logical'. l:tempidx . '#' . r
+        let tempidx += 1
+    endfor
+
+    return s
+
+endfunc
+
+" Args {{{1
+func! CurArg()
+    let l:rtn = ''
+    if argc() == 0 || argv(argidx()) !=# @%
+        return @%
+    endif
+
+    let l:curarg = argv(argidx())
+
+    let l:rtn .= '[' . l:curarg . ']'
+
+    return l:rtn
+endfun
+
+func! OtherArgsMiddle()
+    if has_key(g:,'otherargmiddle')
+        return g:otherargmiddle
+    endif
+
+    let l:rtn = ''
+
+    if argc() == 0
+        return ''
+    endif
+
+    let l:curarg = argv(argidx())
+
+    if argv(argidx()) !=# @%
+        let l:rtn = '  [ ' . l:curarg . ' ] '
+    else
+        if argc() > 1
+            let l:rtn = '  [ ' . '|' . ' ] '
+        else
+            let l:rtn = CurArg()
+        endif
+    endif
+
+    return l:rtn
+endfunc
+
+func! OtherArgsRight()
+    let rtn = ''
+    for r in g:otherargsright
+        let rtn .= '' . r . ' '
+    endfor
+    return l:rtn
+endfunc
+
+func! OtherArgsLeft()
+    if has_key(g:,'otherargmiddle')
+        unlet g:otherargmiddle
+    endif
+
+    let g:otherargmiddle = OtherArgsMiddle()
+    let consume = &columns
+    let consume -= len(g:otherargmiddle)
+    let consume -= 15
+
+    let g:otherargsleft = []
+    let g:otherargsright = []
+
+    let l:leftidx = argidx() - 1
+    let l:rightidx = argidx() + 1
+    let l:leftfailed = 0
+    let l:rightfailed = 0
+
+    while 1
+        if leftfailed && rightfailed
+            break
+        endif
+
+        if !leftfailed
+            if l:leftidx < 0
+                let l:leftfailed = 1
+            else
+                let l = argv(l:leftidx)
+                let llen = len(l:l)
+                if l:llen < l:consume
+                    call add(g:otherargsleft,l:l)
+                    let l:consume -= l:llen
+                    let l:leftidx -= 1
+                else
+                    let l:leftfailed = 1
+                endif
+            endif
+        endif
+
+        if !rightfailed
+            if l:rightidx >= argc()
+                let rightfailed = 1
+            else
+                let r = argv(l:rightidx)
+                let rlen = len(l:r)
+                if l:rlen < l:consume
+                    call add(g:otherargsright,l:r)
+                    let l:consume -= l:rlen
+                    let l:rightidx += 1
+                else
+                    let l:rightfailed = 1
+                endif
+            endif
+        endif
+    endwhile
+
+    let rtn = ''
+    for l in reverse(g:otherargsleft)
+        let rtn .= '' . l . ' '
+    endfor
+    return l:rtn
+endfun
+
+
+" The end (Mappings and shit) {{{1
+nnoremap <Plug>(Logic-Next) :update \| call <SID>GetNextBuffer()<cr>
+nnoremap <Plug>(Logic-Prev) :update \| call <SID>GetPrevBuffer()<cr>
 
 if g:logical_buffer_use_default
     nmap <silent><m-n> <Plug>(Logic-Next)
     nmap <silent><m-N> <Plug>(Logic-Prev)
 endif
 
+if g:logical_buffer_override_stupid_tabline
+    set stal=2
+    set tabline=%!logicalBuffers#TablineOverride()
+endif
