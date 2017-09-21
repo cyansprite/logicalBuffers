@@ -35,10 +35,6 @@ if !hlexists( 'LogicalBuffer' )
     hi LogicalBuffer ctermfg=254 ctermbg=63 cterm=bold
 endif
 
-if !hlexists( 'LogicalWindowHandle' )
-    hi LogicalWindowHandle ctermfg=63 ctermbg=none cterm=bold
-endif
-
 if !hlexists( 'LogicalModified' )
     hi LogicalModified ctermfg=46 ctermbg=none cterm=bold
 endif
@@ -48,51 +44,51 @@ if !hlexists( 'LogicalReadOnly' )
 endif
 
 if !hlexists( 'Logical0' )
-    hi Logical0 ctermfg=231 ctermbg=0 cterm=bold
+    hi Logical0 ctermfg=1 ctermbg=0 cterm=bold
 endif
 
 if !hlexists( 'Logical1' )
-    hi Logical1 ctermfg=254 ctermbg=0
+    hi Logical1 ctermfg=2 ctermbg=0 cterm=bold
 endif
 
 if !hlexists( 'Logical2' )
-    hi Logical2 ctermfg=251 ctermbg=0
+    hi Logical2 ctermfg=3 ctermbg=0 cterm=bold
 endif
 
 if !hlexists( 'Logical3' )
-    hi Logical3 ctermfg=248 ctermbg=0
+    hi Logical3 ctermfg=4 ctermbg=0 cterm=bold
 endif
 
 if !hlexists( 'Logical4' )
-    hi Logical4 ctermfg=245 ctermbg=0
+    hi Logical4 ctermfg=5 ctermbg=0 cterm=bold
 endif
 
 if !hlexists( 'Logical5' )
-    hi Logical5 ctermfg=242 ctermbg=0
+    hi Logical5 ctermfg=6 ctermbg=0 cterm=bold
 endif
 
 if !hlexists( 'Logical6' )
-    hi Logical6 ctermfg=239 ctermbg=0
+    hi Logical6 ctermfg=7 ctermbg=0 cterm=bold
 endif
 
 if !hlexists( 'Logical7' )
-    hi Logical7 ctermfg=237 ctermbg=0
+    hi Logical7 ctermfg=237 ctermbg=0 cterm=bold
 endif
 
 if !hlexists( 'Logical8' )
-    hi Logical8 ctermfg=237 ctermbg=0
+    hi Logical8 ctermfg=237 ctermbg=0 cterm=bold
 endif
 
 if !hlexists( 'Logical9' )
-    hi Logical9 ctermfg=237 ctermbg=0
+    hi Logical9 ctermfg=237 ctermbg=0 cterm=bold
 endif
 
 if !hlexists( 'Logical10' )
-    hi Logical10 ctermfg=237 ctermbg=0
+    hi Logical10 ctermfg=237 ctermbg=0 cterm=bold
 endif
 
 if !hlexists( 'Logical11' )
-    hi Logical11 ctermfg=237 ctermbg=0
+    hi Logical11 ctermfg=237 ctermbg=0 cterm=bold
 endif
 
 " Help me!! {{{1
@@ -182,7 +178,7 @@ function! logicalBuffers#TablineOverride()
             let bufexpander = ''
 
             if !empty(buf.windows)
-                let s = '%#LogicalWindowHandle#| ' . s . '%#LogicalWindowHandle#|'
+                let s = ' | ' . s . '| '
                 let bufexpander = '   '
             else
                 let s .= ' '
