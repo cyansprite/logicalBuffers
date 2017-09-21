@@ -23,12 +23,12 @@ if !has_key(g:,"logical_buffer_sep")
     let g:logical_buffer_sep = '|'
 endif
 
-if !has_key(g:,"logical_center_left_padding")
-    let g:logical_center_left_padding = 0
+if !has_key(g:,"logical_center_use_buffers")
+    let g:logical_center_use_buffers = 1
 endif
 
-if !has_key(g:,"logical_center_right_padding")
-    let g:logical_center_right_padding = 0
+if !has_key(g:,"logical_center_use_args")
+    let g:logical_center_use_args = 0
 endif
 
 if !hlexists( 'LogicalBuffer' )
@@ -76,7 +76,23 @@ if !hlexists( 'Logical6' )
 endif
 
 if !hlexists( 'Logical7' )
-    hi Logical7 ctermfg=235 ctermbg=0
+    hi Logical7 ctermfg=237 ctermbg=0
+endif
+
+if !hlexists( 'Logical8' )
+    hi Logical8 ctermfg=237 ctermbg=0
+endif
+
+if !hlexists( 'Logical9' )
+    hi Logical9 ctermfg=237 ctermbg=0
+endif
+
+if !hlexists( 'Logical10' )
+    hi Logical10 ctermfg=237 ctermbg=0
+endif
+
+if !hlexists( 'Logical11' )
+    hi Logical11 ctermfg=237 ctermbg=0
 endif
 
 " Help me!! {{{1
@@ -152,57 +168,77 @@ function! logicalBuffers#TablineOverride()
     let rightfilebufferlist = []
     let goright = 0
 
-    for buf in (getbufinfo({'buflisted': 1}))
-        if s:keepGoing(buf)
-            continue
-        endif
-
-        let bufname     = bufname(buf.bufnr)
-        let amicur      = buf.bufnr == bufnr('')
-
-        let s = (l:bufname != '' ? ''. fnamemodify(l:bufname, ':t') . ' ' : '[No Name] ')
-        let bufname = l:s
-        let bufexpander = ''
-
-        if !empty(buf.windows)
-            let s = '%#LogicalWindowHandle#| ' . s . '%#LogicalWindowHandle#|'
-            let bufexpander = '   '
-        else
-            let s .= ' '
-            let bufexpander = ' '
-        endif
-
-        if getbufvar(buf.bufnr, "&mod")
-            let s .= '%#LogicalModified#[+]'
-            let bufexpander = '   '
-        endif
-
-        if getbufvar(buf.bufnr, "&ro")
-            let s .= '%#LogicalReadOnly#[RO]'
-            let bufexpander = '    '
-        endif
-
-        if !getbufvar(buf.bufnr, "&ma")
-            let s .= '%#LogicalReadOnly#[-]'
-            let bufexpander = '   '
-        endif
-        let bufname .= bufexpander
-
-        if l:amicur
-            let goright=1
-            let l:thebuffer = l:s
-            let l:curbufname = l:bufname
-        else
-            if l:goright
-                call add(rightbufferlist, l:s)
-                call add(rightfilebufferlist, l:bufname)
-            else
-                call add(leftbufferlist , l:s)
-                call add(leftfilebufferlist , l:bufname)
+    if g:logical_center_use_buffers
+        for buf in getbufinfo({'buflisted': 1})
+            if s:keepGoing(buf)
+                continue
             endif
-        endif
 
-    endfor
+            let bufname     = bufname(buf.bufnr)
+            let amicur      = buf.bufnr == bufnr('')
+
+            let s = (l:bufname != '' ? ''. fnamemodify(l:bufname, ':t') . ' ' : '[No Name] ')
+            let bufname = l:s
+            let bufexpander = ''
+
+            if !empty(buf.windows)
+                let s = '%#LogicalWindowHandle#| ' . s . '%#LogicalWindowHandle#|'
+                let bufexpander = '   '
+            else
+                let s .= ' '
+                let bufexpander = ' '
+            endif
+
+            if getbufvar(buf.bufnr, "&mod")
+                let s .= '%#LogicalModified#[+]'
+                let bufexpander = '   '
+            endif
+
+            if getbufvar(buf.bufnr, "&ro")
+                let s .= '%#LogicalReadOnly#[RO]'
+                let bufexpander = '    '
+            endif
+
+            if !getbufvar(buf.bufnr, "&ma")
+                let s .= '%#LogicalReadOnly#[-]'
+                let bufexpander = '   '
+            endif
+            let bufname .= bufexpander
+
+            if l:amicur
+                let goright=1
+                let l:thebuffer = l:s
+                let l:curbufname = l:bufname
+            else
+                if l:goright
+                    call add(rightbufferlist, l:s)
+                    call add(rightfilebufferlist, l:bufname)
+                else
+                    call add(leftbufferlist , l:s)
+                    call add(leftfilebufferlist , l:bufname)
+                endif
+            endif
+        endfor
+    elseif g:logical_center_use_args
+        let l:rightidx   = argidx() + 1
+        let l:leftidx    = argidx() - 1
+        let l:thebuffer  = ' [ ' . argv(argidx()) . ' ] '
+        let l:curbufname = l:thebuffer
+
+        while l:rightidx < argc() || l:leftidx > 0
+            if l:leftidx > 0
+                call add(leftbufferlist, ' ' . argv(l:leftidx) . ' ')
+                call add(leftfilebufferlist, ' ' . argv(l:leftidx) . ' ')
+                let l:leftidx  -= 1
+            endif
+
+            if l:rightidx < argc()
+                call add(rightbufferlist , ' ' . argv(l:rightidx) . ' ')
+                call add(rightfilebufferlist , ' ' . argv(l:rightidx) . ' ')
+                let l:rightidx += 1
+            endif
+        endwhile
+    endif
 
     let consume = &columns
     let consume -= len(l:curbufname)
@@ -277,119 +313,6 @@ function! logicalBuffers#TablineOverride()
     return s
 
 endfunc
-
-" Args {{{1
-func! CurArg()
-    let l:rtn = ''
-    if argc() == 0 || argv(argidx()) !=# @%
-        return @%
-    endif
-
-    let l:curarg = argv(argidx())
-
-    let l:rtn .= '[' . l:curarg . ']'
-
-    return l:rtn
-endfun
-
-func! OtherArgsMiddle()
-    if has_key(g:,'otherargmiddle')
-        return g:otherargmiddle
-    endif
-
-    let l:rtn = ''
-
-    if argc() == 0
-        return ''
-    endif
-
-    let l:curarg = argv(argidx())
-
-    if argv(argidx()) !=# @%
-        let l:rtn = '  [ ' . l:curarg . ' ] '
-    else
-        if argc() > 1
-            let l:rtn = '  [ ' . '|' . ' ] '
-        else
-            let l:rtn = CurArg()
-        endif
-    endif
-
-    return l:rtn
-endfunc
-
-func! OtherArgsRight()
-    let rtn = ''
-    for r in g:otherargsright
-        let rtn .= '' . r . ' '
-    endfor
-    return l:rtn
-endfunc
-
-func! OtherArgsLeft()
-    if has_key(g:,'otherargmiddle')
-        unlet g:otherargmiddle
-    endif
-
-    let g:otherargmiddle = OtherArgsMiddle()
-    let consume = &columns
-    let consume -= len(g:otherargmiddle)
-    let consume -= 15
-
-    let g:otherargsleft = []
-    let g:otherargsright = []
-
-    let l:leftidx = argidx() - 1
-    let l:rightidx = argidx() + 1
-    let l:leftfailed = 0
-    let l:rightfailed = 0
-
-    while 1
-        if leftfailed && rightfailed
-            break
-        endif
-
-        if !leftfailed
-            if l:leftidx < 0
-                let l:leftfailed = 1
-            else
-                let l = argv(l:leftidx)
-                let llen = len(l:l)
-                if l:llen < l:consume
-                    call add(g:otherargsleft,l:l)
-                    let l:consume -= l:llen
-                    let l:leftidx -= 1
-                else
-                    let l:leftfailed = 1
-                endif
-            endif
-        endif
-
-        if !rightfailed
-            if l:rightidx >= argc()
-                let rightfailed = 1
-            else
-                let r = argv(l:rightidx)
-                let rlen = len(l:r)
-                if l:rlen < l:consume
-                    call add(g:otherargsright,l:r)
-                    let l:consume -= l:rlen
-                    let l:rightidx += 1
-                else
-                    let l:rightfailed = 1
-                endif
-            endif
-        endif
-    endwhile
-
-    let rtn = ''
-    for l in reverse(g:otherargsleft)
-        let rtn .= '' . l . ' '
-    endfor
-    return l:rtn
-endfun
-
-
 " The end (Mappings and shit) {{{1
 nnoremap <Plug>(Logic-Next) :update \| call <SID>GetNextBuffer()<cr>
 nnoremap <Plug>(Logic-Prev) :update \| call <SID>GetPrevBuffer()<cr>
