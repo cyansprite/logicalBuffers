@@ -32,7 +32,7 @@ if !has_key(g:,"logical_center_use_args")
 endif
 
 if !hlexists( 'LogicalBuffer' )
-    hi LogicalBuffer ctermfg=254 ctermbg=63 cterm=bold
+    hi LogicalBuffer ctermfg=46 ctermbg=22 cterm=bold
 endif
 
 if !hlexists( 'LogicalModified' )
@@ -156,6 +156,7 @@ endfunction
 
 " Tabline Fuck off {{{1
 function! logicalBuffers#TablineOverride()
+    " Vars {{{2
     let thebuffer = ''
     let curbufname = ''
     let leftbufferlist = []
@@ -164,6 +165,7 @@ function! logicalBuffers#TablineOverride()
     let rightfilebufferlist = []
     let goright = 0
 
+    " Get the list we care about {{{2
     if g:logical_center_use_buffers
         for buf in getbufinfo({'buflisted': 1})
             if s:keepGoing(buf)
@@ -177,30 +179,44 @@ function! logicalBuffers#TablineOverride()
             let bufname = l:s
             let bufexpander = ''
 
+            " If it has a window surround with |
             if !empty(buf.windows)
                 let s = ' | ' . s . '| '
-                let bufexpander = '   '
-            else
-                let s .= ' '
-                let bufexpander = ' '
+                let bufexpander .= '   '
             endif
 
+            " If it's alternate surround with ^
+            if bufnr('#') == buf.bufnr
+                let s = ' ^ ' . s . '^ '
+                let bufexpander .= '   '
+            endif
+
+            " If it's current arg surround with []
+            if argv(argidx()) == bufname(buf.bufnr)
+                let s = ' [' . s . '] '
+                let bufexpander .= '   '
+            endif
+
+            " If it's modified but a green +
             if getbufvar(buf.bufnr, "&mod")
                 let s .= '%#LogicalModified#[+]'
-                let bufexpander = '   '
+                let bufexpander .= '   '
             endif
 
+            " If it's read-only but a red RO
             if getbufvar(buf.bufnr, "&ro")
                 let s .= '%#LogicalReadOnly#[RO]'
-                let bufexpander = '    '
+                let bufexpander .= '    '
             endif
 
+            " If it's not modifiable put a red -
             if !getbufvar(buf.bufnr, "&ma")
                 let s .= '%#LogicalReadOnly#[-]'
-                let bufexpander = '   '
+                let bufexpander .= '   '
             endif
             let bufname .= bufexpander
 
+            " Which list to put buffers in
             if l:amicur
                 let goright=1
                 let l:thebuffer = l:s
@@ -215,6 +231,7 @@ function! logicalBuffers#TablineOverride()
                 endif
             endif
         endfor
+    " Arg list
     elseif g:logical_center_use_args
         let l:rightidx   = argidx() + 1
         let l:leftidx    = argidx() - 1
@@ -236,6 +253,8 @@ function! logicalBuffers#TablineOverride()
         endwhile
     endif
 
+
+    " Colorize and limit {{{2
     let consume = &columns
     let consume -= len(l:curbufname)
 
@@ -246,6 +265,7 @@ function! logicalBuffers#TablineOverride()
 
     let l:Lfinal = []
     let l:Rfinal = []
+
     while 1
         if leftfailed && rightfailed
             break
@@ -288,6 +308,7 @@ function! logicalBuffers#TablineOverride()
 
     let s = ''
 
+    " Putting finishing touches {{{2
     " Left of
     let tempidx = len(l:Lfinal) - 1
     for l in l:Lfinal
@@ -308,7 +329,7 @@ function! logicalBuffers#TablineOverride()
 
     return s
 
-endfunc
+endfunc "}}}2
 " The end (Mappings and shit) {{{1
 nnoremap <Plug>(Logic-Next) :update \| call <SID>GetNextBuffer()<cr>
 nnoremap <Plug>(Logic-Prev) :update \| call <SID>GetPrevBuffer()<cr>
