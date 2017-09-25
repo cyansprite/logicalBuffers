@@ -32,7 +32,7 @@ if !has_key(g:,"logical_center_use_args")
 endif
 
 if !hlexists( 'LogicalBuffer' )
-    hi LogicalBuffer ctermfg=46 ctermbg=22 cterm=bold
+    hi LogicalBuffer ctermfg=231 ctermbg=16 cterm=bold
 endif
 
 if !hlexists( 'LogicalModified' )
