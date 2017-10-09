@@ -32,63 +32,63 @@ if !has_key(g:,"logical_center_use_args")
 endif
 
 if !hlexists( 'LogicalBuffer' )
-    hi LogicalBuffer ctermfg=231 ctermbg=16 cterm=bold
+    hi LogicalModified ctermfg=none ctermbg=none cterm=bold
 endif
 
 if !hlexists( 'LogicalModified' )
-    hi LogicalModified ctermfg=46 ctermbg=none cterm=bold
+    hi LogicalModified ctermfg=2 ctermbg=none cterm=bold
 endif
 
 if !hlexists( 'LogicalReadOnly' )
-    hi LogicalReadOnly ctermfg=196 ctermbg=none cterm=bold
+    hi LogicalReadOnly ctermfg=1 ctermbg=none cterm=bold
 endif
 
 if !hlexists( 'Logical0' )
-    hi Logical0 ctermfg=1 ctermbg=0 cterm=bold
+    hi Logical0 ctermfg=6 ctermbg=0 cterm=bold
 endif
 
 if !hlexists( 'Logical1' )
-    hi Logical1 ctermfg=2 ctermbg=0 cterm=bold
+    hi Logical1 ctermfg=5 ctermbg=0 cterm=bold
 endif
 
 if !hlexists( 'Logical2' )
-    hi Logical2 ctermfg=3 ctermbg=0 cterm=bold
+    hi Logical2 ctermfg=4 ctermbg=0 cterm=bold
 endif
 
 if !hlexists( 'Logical3' )
-    hi Logical3 ctermfg=4 ctermbg=0 cterm=bold
+    hi Logical3 ctermfg=3 ctermbg=0 cterm=bold
 endif
 
 if !hlexists( 'Logical4' )
-    hi Logical4 ctermfg=5 ctermbg=0 cterm=bold
+    hi Logical4 ctermfg=2 ctermbg=0 cterm=bold
 endif
 
 if !hlexists( 'Logical5' )
-    hi Logical5 ctermfg=6 ctermbg=0 cterm=bold
+    hi Logical5 ctermfg=1 ctermbg=0 cterm=bold
 endif
 
 if !hlexists( 'Logical6' )
-    hi Logical6 ctermfg=7 ctermbg=0 cterm=bold
+    hi Logical6 ctermfg=1 ctermbg=0 cterm=none
 endif
 
 if !hlexists( 'Logical7' )
-    hi Logical7 ctermfg=237 ctermbg=0 cterm=bold
+    hi Logical7 ctermfg=2 ctermbg=0 cterm=none
 endif
 
 if !hlexists( 'Logical8' )
-    hi Logical8 ctermfg=237 ctermbg=0 cterm=bold
+    hi Logical8 ctermfg=3 ctermbg=0 cterm=none
 endif
 
 if !hlexists( 'Logical9' )
-    hi Logical9 ctermfg=237 ctermbg=0 cterm=bold
+    hi Logical9 ctermfg=4 ctermbg=0 cterm=none
 endif
 
 if !hlexists( 'Logical10' )
-    hi Logical10 ctermfg=237 ctermbg=0 cterm=bold
+    hi Logical10 ctermfg=5 ctermbg=0 cterm=none
 endif
 
 if !hlexists( 'Logical11' )
-    hi Logical11 ctermfg=237 ctermbg=0 cterm=bold
+    hi Logical11 ctermfg=6 ctermbg=0 cterm=none
 endif
 
 " Help me!! {{{1
@@ -175,26 +175,34 @@ function! logicalBuffers#TablineOverride()
             let bufname     = bufname(buf.bufnr)
             let amicur      = buf.bufnr == bufnr('')
 
-            let s = (l:bufname != '' ? ''. fnamemodify(l:bufname, ':t') . ' ' : '[No Name] ')
+            let s = (l:bufname != '' ? ''. fnamemodify(l:bufname, ':t') . '' : '[No Name] ')
             let bufname = l:s
             let bufexpander = ''
+            let needspaces = 0
 
             " If it has a window surround with |
             if !empty(buf.windows)
-                let s = ' | ' . s . '| '
-                let bufexpander .= '   '
+                let s = '|' . s . '|'
+                let bufexpander .= ' '
             endif
 
             " If it's alternate surround with ^
             if bufnr('#') == buf.bufnr
-                let s = ' ^ ' . s . '^ '
-                let bufexpander .= '   '
+                let s = '^' . s . '^'
+                let bufexpander .= ' '
             endif
 
             " If it's current arg surround with []
             if argv(argidx()) == bufname(buf.bufnr)
                 let s = ' [' . s . '] '
-                let bufexpander .= '   '
+                let bufexpander .= ' '
+            else
+                let l:needspaces = 1
+            endif
+
+            if l:needspaces
+                let s = ' ' . s . ' '
+                let bufexpander .= ' '
             endif
 
             " If it's modified but a green +
