@@ -19,6 +19,10 @@ if !has_key(g:,"logical_buffer_ignore_windowed")
     let g:logical_buffer_ignore_windowed = 1
 endif
 
+if !has_key(g:,"logical_buffer_list_number")
+    let g:logical_buffer_list_number = 1
+endif
+
 if !has_key(g:,"logical_buffer_sep")
     let g:logical_buffer_sep = '|'
 endif
@@ -174,11 +178,17 @@ function! logicalBuffers#TablineOverride()
 
             let bufname     = bufname(buf.bufnr)
             let amicur      = buf.bufnr == bufnr('')
-
-            let s = (l:bufname != '' ? ''. fnamemodify(l:bufname, ':t') . '' : '[No Name] ')
-            let bufname = l:s
+            let s = ""
             let bufexpander = ''
             let needspaces = 0
+
+            if g:logical_buffer_list_number
+                let s .= string(buf.bufnr) . ':'
+                let bufexpander .= '  '
+            endif
+
+            let s .= (l:bufname != '' ? ''. fnamemodify(l:bufname, ':t') . '' : '[No Name] ')
+            let bufname = l:s
 
             " If it has a window surround with |
             if !empty(buf.windows)
