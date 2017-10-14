@@ -36,63 +36,63 @@ if !has_key(g:,"logical_center_use_args")
 endif
 
 if !hlexists( 'LogicalBuffer' )
-    hi LogicalBuffer ctermfg=none ctermbg=none cterm=bold
+    hi LogicalBuffer ctermfg=none ctermbg=none cterm=bold,inverse
 endif
 
-if !hlexists( 'LogicalModified' )
-    hi LogicalModified ctermfg=2 ctermbg=none cterm=bold
+if !hlexists( 'logicalmodified' )
+    hi logicalmodified ctermfg=2 ctermbg=none cterm=bold
 endif
 
-if !hlexists( 'LogicalReadOnly' )
-    hi LogicalReadOnly ctermfg=1 ctermbg=none cterm=bold
+if !hlexists( 'logicalreadonly' )
+    hi logicalreadonly ctermfg=1 ctermbg=none cterm=bold
 endif
 
-if !hlexists( 'Logical0' )
-    hi Logical0 ctermfg=6 ctermbg=0 cterm=bold
+if !hlexists( 'logical0' )
+    hi logical0 ctermfg=6 ctermbg=0 cterm=bold
 endif
 
-if !hlexists( 'Logical1' )
-    hi Logical1 ctermfg=5 ctermbg=0 cterm=bold
+if !hlexists( 'logical1' )
+    hi logical1 ctermfg=5 ctermbg=0 cterm=bold
 endif
 
-if !hlexists( 'Logical2' )
-    hi Logical2 ctermfg=4 ctermbg=0 cterm=bold
+if !hlexists( 'logical2' )
+    hi logical2 ctermfg=4 ctermbg=0 cterm=bold
 endif
 
-if !hlexists( 'Logical3' )
-    hi Logical3 ctermfg=3 ctermbg=0 cterm=bold
+if !hlexists( 'logical3' )
+    hi logical3 ctermfg=3 ctermbg=0 cterm=bold
 endif
 
-if !hlexists( 'Logical4' )
-    hi Logical4 ctermfg=2 ctermbg=0 cterm=bold
+if !hlexists( 'logical4' )
+    hi logical4 ctermfg=2 ctermbg=0 cterm=bold
 endif
 
-if !hlexists( 'Logical5' )
-    hi Logical5 ctermfg=1 ctermbg=0 cterm=bold
+if !hlexists( 'logical5' )
+    hi logical5 ctermfg=1 ctermbg=0 cterm=bold
 endif
 
-if !hlexists( 'Logical6' )
-    hi Logical6 ctermfg=1 ctermbg=0 cterm=none
+if !hlexists( 'logical6' )
+    hi logical6 ctermfg=1 ctermbg=0 cterm=none
 endif
 
-if !hlexists( 'Logical7' )
-    hi Logical7 ctermfg=2 ctermbg=0 cterm=none
+if !hlexists( 'logical7' )
+    hi logical7 ctermfg=2 ctermbg=0 cterm=none
 endif
 
-if !hlexists( 'Logical8' )
-    hi Logical8 ctermfg=3 ctermbg=0 cterm=none
+if !hlexists( 'logical8' )
+    hi logical8 ctermfg=3 ctermbg=0 cterm=none
 endif
 
-if !hlexists( 'Logical9' )
-    hi Logical9 ctermfg=4 ctermbg=0 cterm=none
+if !hlexists( 'logical9' )
+    hi logical9 ctermfg=4 ctermbg=0 cterm=none
 endif
 
-if !hlexists( 'Logical10' )
-    hi Logical10 ctermfg=5 ctermbg=0 cterm=none
+if !hlexists( 'logical10' )
+    hi logical10 ctermfg=5 ctermbg=0 cterm=none
 endif
 
-if !hlexists( 'Logical11' )
-    hi Logical11 ctermfg=6 ctermbg=0 cterm=none
+if !hlexists( 'logical11' )
+    hi logical11 ctermfg=6 ctermbg=0 cterm=none
 endif
 
 " Help me!! {{{1
