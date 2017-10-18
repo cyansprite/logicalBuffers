@@ -161,7 +161,7 @@ endfunction
 " Tabline Fuck off {{{1
 function! logicalBuffers#TablineOverride()
     " Vars {{{2
-    let thebuffer = ''
+    let s:thebuffer = ''
     let curbufname = ''
     let leftbufferlist = []
     let rightbufferlist = []
@@ -201,14 +201,15 @@ function! logicalBuffers#TablineOverride()
                 let s = '^' . s . '^'
                 let bufexpander .= ' '
             endif
+            let l:needspaces = 1
 
             " If it's current arg surround with []
-            if argv(argidx()) == bufname(buf.bufnr)
-                let s = ' [' . s . '] '
-                let bufexpander .= ' '
-            else
-                let l:needspaces = 1
-            endif
+            " if argv(argidx()) == bufname(buf.bufnr)
+            "     let s = ' [' . s . '] '
+            "     let bufexpander .= ' '
+            " else
+            "     let l:needspaces = 1
+            " endif
 
             if l:needspaces
                 let s = ' ' . s . ' '
@@ -237,7 +238,7 @@ function! logicalBuffers#TablineOverride()
             " Which list to put buffers in
             if l:amicur
                 let goright=1
-                let l:thebuffer = l:s
+                let s:thebuffer = l:s
                 let l:curbufname = l:bufname
             else
                 if l:goright
@@ -253,8 +254,8 @@ function! logicalBuffers#TablineOverride()
     elseif g:logical_center_use_args
         let l:rightidx   = argidx() + 1
         let l:leftidx    = argidx() - 1
-        let l:thebuffer  = ' [ ' . argv(argidx()) . ' ] '
-        let l:curbufname = l:thebuffer
+        let s:thebuffer  = ' [ ' . argv(argidx()) . ' ] '
+        let l:curbufname = s:thebuffer
 
         while l:rightidx < argc() || l:leftidx > 0
             if l:leftidx > 0
@@ -281,8 +282,8 @@ function! logicalBuffers#TablineOverride()
     let l:leftfailed = 0
     let l:rightfailed = 0
 
-    let l:Lfinal = []
-    let l:Rfinal = []
+    let s:Lfinal = []
+    let s:Rfinal = []
 
     while 1
         if leftfailed && rightfailed
@@ -297,7 +298,7 @@ function! logicalBuffers#TablineOverride()
                 let la = leftfilebufferlist[l:leftidx]
                 let llen = len(l:la)
                 if l:llen < l:consume
-                    call insert(l:Lfinal,l:l)
+                    call insert(s:Lfinal,l:l)
                     let l:consume -= l:llen
                     let l:leftidx -= 1
                 else
@@ -314,7 +315,7 @@ function! logicalBuffers#TablineOverride()
                 let ra = rightfilebufferlist[l:rightidx]
                 let rlen = len(l:ra)
                 if l:rlen < l:consume
-                    call add(l:Rfinal,l:r)
+                    call add(s:Rfinal,l:r)
                     let l:consume -= l:rlen
                     let l:rightidx += 1
                 else
@@ -328,26 +329,86 @@ function! logicalBuffers#TablineOverride()
 
     " Putting finishing touches {{{2
     " Left of
-    let tempidx = len(l:Lfinal) - 1
-    for l in l:Lfinal
+    let tempidx = len(s:Lfinal) - 1
+    for l in s:Lfinal
         let s  .= '%#Logical'. l:tempidx . '#' . l
         let tempidx -= 1
     endfor
     let s .= '%4*%='
 
     " The current
-    let s .= '%#LogicalBuffer#'.l:thebuffer .'%4*%='
+    let s .= '%#LogicalBuffer#'.s:thebuffer .'%4*%='
 
     " Right of
     let tempidx = 0
-    for r in l:Rfinal
+    for r in s:Rfinal
         let s  .= '%#Logical'. l:tempidx . '#' . r
         let tempidx += 1
     endfor
 
     return s
-
 endfunc "}}}2
+" Better LS
+func! logicalBuffers#LS()
+    call s:echo(0)
+    echohl NONE
+endfunc
+
+func! logicalBuffers#Kill()
+    call s:echo(1)
+    echohl NONE
+endfunc
+
+func! s:echo(op)
+    echohl Title
+    echom "Buffers"
+    echom repeat("=", winwidth(".") - 10)
+    echohl NONE
+    echom ""
+    let all = s:Lfinal
+    let ind = len(l:all) - 1
+    for x in l:all
+        exec 'echohl Logical' . l:ind
+        echom x
+        echohl NONE
+        echom ''
+        let ind -= 1
+    endfor
+
+    echohl LogicalBuffer
+    echom s:thebuffer
+    echohl NONE
+
+    let all = s:Rfinal
+    let l:ind = 0
+    for x in l:all
+        exec 'echohl Logical' . l:ind
+        echom x
+        echohl NONE
+        echom ''
+        let ind += 1
+    endfor
+    echom ""
+    echom ""
+    echohl Question
+    let answer = input("Buffer To Choose (ctrl-c cancels) >>> ")
+    echohl None
+
+
+    try
+        if a:op == 0
+            exec 'b'.l:answer
+        else
+            exec 'bw'.l:answer
+        endif
+    catch
+        echom ''
+        echom ''
+        echohl ErrorMsg
+        echom "You need it to be a buffer that exists!!"
+        echohl NONE
+    endtry
+endfun
 " The end (Mappings and shit) {{{1
 nnoremap <Plug>(Logic-Next) :update \| call <SID>GetNextBuffer()<cr>
 nnoremap <Plug>(Logic-Prev) :update \| call <SID>GetPrevBuffer()<cr>
