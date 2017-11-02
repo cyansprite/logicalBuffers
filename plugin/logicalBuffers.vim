@@ -97,8 +97,9 @@ endif
 
 " Help me!! {{{1
 function! s:keepGoing(buf)
+    echom 
     return  (a:buf.hidden && g:logical_buffer_ignore_hidden) ||
-          \ (getbufvar(a:buf.bufnr, "&buftype" != "") && g:logical_buffer_ignore_weird)
+          \ (getbufvar(a:buf.bufnr, "&buftype") != "" && g:logical_buffer_ignore_weird)
 endfunc
 " If we are cycling we don't want to pick something already in a window...
 function! s:keepGoingMove(buf)
