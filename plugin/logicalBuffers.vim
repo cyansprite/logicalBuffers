@@ -653,14 +653,10 @@ endfun
 " The end (Mappings and shit) {{{1
 nnoremap <Plug>(Logic-Next) :call <SID>GetNextBuffer()<cr>
 nnoremap <Plug>(Logic-Prev) :call <SID>GetPrevBuffer()<cr>
-command! -bang -nargs=* LS call logicalBuffers#LS('<args>' . '', '<bang>' == '!')
-command! -bang -nargs=* KILL call logicalBuffers#Kill('<args>'. '', '<bang>' == '!')
 
 if g:logical_buffer_use_default
     nmap <silent><m-n> <Plug>(Logic-Next)
     nmap <silent><m-N> <Plug>(Logic-Prev)
-    nmap <silent><leader>b :LS<cr>
-    nmap <silent><leader>k :KILL<cr>
 endif
 
 if g:logical_buffer_override_stupid_tabline
