@@ -211,7 +211,7 @@ function! s:GetPrevBuffer()
 endfunction
 
 " Tabline Fuck off {{{1
-function! logicalBuffers#TablineOverride()
+function! logicalBuffers#TablineOverride(_s)
     " Vars {{{2
     let s:thebuffer = ''
     let curbufname = ''
@@ -661,5 +661,9 @@ endif
 
 if g:logical_buffer_override_stupid_tabline
     set stal=2
-    set tabline=%!logicalBuffers#TablineOverride()
+    set tabline=%!logicalBuffers#TablineOverride('')
+else
+    if !has_key(s:,"logical_timer_set")
+        let s:logical_timer_set = timer_start(1000, "logicalBuffers#TablineOverride", { 'repeat': -1 })
+    endif
 endif
